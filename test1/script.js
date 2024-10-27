@@ -1,4 +1,3 @@
-// Cache selectors
 const educationSelect = document.getElementById('education');
 const networthSelect = document.getElementById('networth');
 const casteSelect = document.getElementById('caste');
@@ -12,97 +11,39 @@ const gossipCharacterCheckbox = document.getElementById('gossipCharacter');
 const generalGossipCheckbox = document.getElementById('generalGossip');
 const submitButton = document.getElementById('submit');
 const finalPriceDisplay = document.getElementById('finalPrice');
-
-// Initial price
-let basePrice = 100;
+const resultMessage = document.getElementById('resultMessage');
 
 submitButton.addEventListener('click', () => {
-    let finalPrice = basePrice;
+  const name = document.getElementById('name').value;
+  const startingBid = Number(document.getElementById('startingBid').value);
+  const loveLetter = document.getElementById('loveLetter').value;
 
-    // Education coefficient
-    let educationCoefficient = 1;
-    switch (educationSelect.value) {
-        case 'bachelor':
-            educationCoefficient = 1.5;
-            break;
-        case 'college':
-            educationCoefficient = 1.2;
-            break;
-        case 'high_school':
-            educationCoefficient = 1.05;
-            break;
-        case 'middle_school':
-            educationCoefficient = 0.9;
-            break;
-    }
-    finalPrice *= educationCoefficient;
+  if (!name || !startingBid) {
+    resultMessage.textContent = "Please enter a name and starting bid.";
+    return;
+  }
 
-    // Net worth coefficient
-    let networthCoefficient = 1;
-    switch (networthSelect.value) {
-        case 'upper_class':
-            networthCoefficient = 2;
-            break;
-        case 'middle_class':
-            networthCoefficient = 1.5;
-            break;
-        case 'lower_class':
-            networthCoefficient = 1.2;
-            break;
-    }
-    finalPrice *= networthCoefficient;
+  let price = startingBid;
 
-    // Caste value addition
-    let casteValue = 0;
-    switch (casteSelect.value) {
-        case 'brahmin':
-            casteValue = 100;
-            break;
-        case 'kshatriya':
-            casteValue = 50;
-            break;
-        case 'vaishya':
-            casteValue = 20;
-            break;
-        case 'shudra':
-            casteValue = 10;
-            break;
-        case 'untouchable':
-            casteValue = -50;
-            break;
-    }
-    finalPrice += casteValue;
+  price *= Number(educationSelect.value);
+  price *= Number(networthSelect.value);
+  price += Number(casteSelect.value);
 
-    // Skills value addition
-    if (musicalInstrumentCheckbox.checked) finalPrice += 10;
-    if (goodCookCheckbox.checked) finalPrice += 20;
-    if (easygoingCharacterCheckbox.checked) finalPrice += 15;
-    if (singsWellCheckbox.checked) finalPrice += 10;
+  const skills = [musicalInstrumentCheckbox, goodCookCheckbox, easygoingCharacterCheckbox, singsWellCheckbox];
+  const skillValues = [10, 20, 15, 10];
+  price += skills
+    .map((checkbox, index) => (checkbox.checked ? skillValues[index] : 0))
+    .reduce((acc, val) => acc + val, 0);
 
-    // Age coefficient
-    let ageCoefficient = 1;
-    for (const radio of ageRadios) {
-        if (radio.checked) {
-            switch (radio.value) {
-                case 'young':
-                    ageCoefficient = 1.5;
-                    break;
-                case 'adult':
-                    ageCoefficient = 1.2;
-                    break;
-                case 'mature':
-                    ageCoefficient = 0.95;
-                    break;
-            }
-        }
-    }
-    finalPrice *= ageCoefficient;
+  const selectedAge = Array.from(ageRadios).find(radio => radio.checked);
+  if (selectedAge) {
+    price *= Number(selectedAge.value);
+  }
 
-    // Reputation adjustments
-    if (gossipParentsCheckbox.checked) finalPrice *= 0.85;
-    if (gossipCharacterCheckbox.checked) finalPrice *= 0.90;
-    if (generalGossipCheckbox.checked) finalPrice -= 20;
+  if (gossipParentsCheckbox.checked) price *= 0.85;
+  if (gossipCharacterCheckbox.checked) price *= 0.90;
+  if (generalGossipCheckbox.checked) price -= 20;
 
-    // Display final price
-    finalPriceDisplay.innerHTML = `$${finalPrice.toFixed(2)}`;
+  finalPriceDisplay.innerHTML = `$${price.toFixed(2)}`;
+  resultMessage.innerHTML = `Your price for ${name} is $${price.toFixed(2)}. <br><br> Love letter: ${loveLetter}`;
 });
